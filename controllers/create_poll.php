@@ -1,28 +1,52 @@
 <?php
 require_once __DIR__ . '/../includes/db.php';
 
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = htmlspecialchars(trim($_POST['title']));
-    $start = $_POST['start_datetime'];
-    $end = $_POST['end_datetime'];
-    $options = array_map(function($opt) {
-    return htmlspecialchars(trim($opt));
-}, $_POST['options']);
+    $title = trim($_POST['title']);
+    $start_datetime = $_POST['start_datetime'];
+    $end_datetime = $_POST['end_datetime'];
+    $options = $_POST['options'] ?? [];
 
-    if (count($options) < 3) {
-        $error = "Você precisa inserir no mínimo 3 opções.";
+    // Validação dos campos obrigatórios
+    if (empty($title) || empty($start_datetime) || empty($end_datetime)) {
+        $error = 'Preencha todos os campos obrigatórios.';
+    } elseif (
+        empty(trim($options[0])) ||
+        empty(trim($options[1])) ||
+        empty(trim($options[2]))
+    ) {
+        $error = 'As três primeiras opções são obrigatórias.';
     } else {
-        $stmt = $pdo->prepare("INSERT INTO polls (title, start_datetime, end_datetime) VALUES (?, ?, ?)");
-        $stmt->execute([$title, $start, $end]);
-        $poll_id = $pdo->lastInsertId();
+        try {
+            $pdo->beginTransaction();
 
-        foreach ($options as $opt) {
-            $stmt = $pdo->prepare("INSERT INTO options (poll_id, option_text) VALUES (?, ?)");
-            $stmt->execute([$poll_id, $opt]);
+            // Inserir a enquete
+            $stmt = $pdo->prepare("INSERT INTO polls (title, start_datetime, end_datetime) VALUES (?, ?, ?)");
+            $stmt->execute([$title, $start_datetime, $end_datetime]);
+            $poll_id = $pdo->lastInsertId();
+
+            // Inserir as opções válidas
+            $stmtOpt = $pdo->prepare("INSERT INTO options (poll_id, option_text) VALUES (?, ?)");
+
+            foreach ($options as $opt) {
+                $opt = trim($opt);
+                if (!empty($opt)) {
+                    $stmtOpt->execute([$poll_id, $opt]);
+                }
+            }
+
+            $pdo->commit();
+
+            // Redirecionar após criar
+            header("Location: ../views/index.php");
+            exit;
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            $error = "Erro ao criar enquete: " . $e->getMessage();
         }
-
-        header("Location: ../views/index.php");
-        exit;
     }
 }
 ?>
@@ -31,41 +55,49 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Criar Enquete</title>
     <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
-<div class="container">
-    <h2>Criar Nova Enquete</h2>
+    <div class="container">
+        <h2>Criar Nova Enquete</h2>
 
-    <?php if (!empty($error)): ?>
-        <p class="error"><?= $error ?></p>
-    <?php endif; ?>
+        <?php if (!empty($error)): ?>
+            <div style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px;">
+                <?= htmlspecialchars($error) ?>
+            </div>
+        <?php endif; ?>
 
-    <form method="post">
-        <label>Título:</label>
-        <input type="text" name="title" required>
+        <form method="post">
+            <label>Título da Enquete:</label><br>
+            <input type="text" name="title" required><br><br>
 
-        <label>Data de Início:</label>
-        <input type="datetime-local" name="start_datetime" required>
+            <label>Data/Hora de Início:</label><br>
+            <input type="datetime-local" name="start_datetime" required><br><br>
 
-        <label>Data de Término:</label>
-        <input type="datetime-local" name="end_datetime" required>
+            <label>Data/Hora de Fim:</label><br>
+            <input type="datetime-local" name="end_datetime" required><br><br>
 
-        <label>Opções (mínimo 3):</label>
-        <div class="option-group">
-            <input type="text" name="options[]" placeholder="Opção 1" required>
-            <input type="text" name="options[]" placeholder="Opção 2" required>
-            <input type="text" name="options[]" placeholder="Opção 3" required>
-            <input type="text" name="options[]" placeholder="Opção 4 (opcional)">
-            <input type="text" name="options[]" placeholder="Opção 5 (opcional)">
-        </div>
+            <label>Opções:</label><br><br>
 
-        <button type="submit">Criar Enquete</button>
-    </form>
+            <?php
+            for ($i = 0; $i < 5; $i++):
+                $placeholder = ($i < 3) ? "Opção " . ($i + 1) . " (obrigatória)" : "Opção " . ($i + 1) . " (opcional)";
+            ?>
+                <input 
+                    type="text" 
+                    name="options[]" 
+                    placeholder="<?= $placeholder ?>" 
+                    <?= $i < 3 ? 'required' : '' ?>
+                ><br>
+            <?php endfor; ?>
 
-    <a class="back" href="../views/index.php">← Voltar</a>
-</div>
+            <br>
+            <button type="submit">Criar Enquete</button>
+        </form>
+
+        <br>
+        <a href="../views/index.php">← Voltar</a>
+    </div>
 </body>
 </html>

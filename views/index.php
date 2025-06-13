@@ -30,7 +30,7 @@ $polls = $stmt->fetchAll();
              até <?= date('d/m/Y H:i', strtotime($poll['end_datetime'])) ?></p>
 
           <div class="poll-actions">
-            <a class="btn" href="../controllers/poll.php?id=<?= $poll['id'] ?>">Ver</a>
+            <a class="btn" href="../views/poll.php?id=<?= $poll['id'] ?>">Ver</a>
             <a class="btn btn-secondary" href="../controllers/edit_poll.php?id=<?= $poll['id'] ?>">Editar</a>
             <a class="btn btn-danger" href="../controllers/delete_poll.php?id=<?= $poll['id'] ?>" onclick="return confirm('Tem certeza que deseja excluir esta enquete?')">Excluir</a>
           </div>

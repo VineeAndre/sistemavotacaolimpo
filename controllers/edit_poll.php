@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <label>Opções de resposta</label>
             <?php if (!empty($options)): ?>
                 <?php foreach ($options as $index => $opt): ?>
-                    <input type="text" name="options[]" value="<?= htmlspecialchars($opt['option_text']) ?>" required>
+                    <input type="text" name="options[]" value="<?= htmlspecialchars($opt['option_text']) ?>">
                 <?php endforeach; ?>
             <?php else: ?>
                 <p class="error">Nenhuma opção disponível.</p>

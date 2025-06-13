@@ -1,43 +1,51 @@
 <?php
-require 'db.php';
-session_start();
+require_once '../includes/db.php';
 
-// Obter IP do usuário
 function getUserIP() {
-    if (!empty($_SERVER['HTTP_CLIENT_IP'])) return $_SERVER['HTTP_CLIENT_IP'];
-    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) return $_SERVER['HTTP_X_FORWARDED_FOR'];
-    return $_SERVER['REMOTE_ADDR'];
+    return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['option_id'], $_POST['poll_id'])) {
-    $option_id = (int)$_POST['option_id'];
     $poll_id = (int)$_POST['poll_id'];
+    $option_id = (int)$_POST['option_id'];
     $ip = getUserIP();
 
-    // Verificar se já votou nesta enquete
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM votes WHERE poll_id = ? AND ip_address = ?");
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM votes_log WHERE poll_id = ? AND ip_address = ?");
     $stmt->execute([$poll_id, $ip]);
     if ($stmt->fetchColumn() > 0) {
-        die("Você já votou nesta enquete.");
+        echo json_encode(['success' => false, 'message' => 'Você já votou.']);
+        exit;
     }
 
-    // Verificar se a enquete está ativa
-    $stmt = $pdo->prepare("SELECT * FROM polls WHERE id = ? AND start_datetime <= NOW() AND end_datetime >= NOW()");
-    $stmt->execute([$poll_id]);
-    if ($stmt->rowCount() === 0) {
-        die("Esta enquete não está ativa.");
-    }
-
-    // Atualizar votos
-    $stmt = $pdo->prepare("UPDATE options SET votes = votes + 1 WHERE id = ? AND poll_id = ?");
+    $stmt = $pdo->prepare("SELECT option_text FROM options WHERE id = ? AND poll_id = ?");
     $stmt->execute([$option_id, $poll_id]);
+    $option = $stmt->fetch();
 
-    // Registrar IP do voto
-    $stmt = $pdo->prepare("INSERT INTO votes (poll_id, ip_address, voted_at) VALUES (?, ?, NOW())");
-    $stmt->execute([$poll_id, $ip]);
+    if (!$option) {
+        echo json_encode(['success' => false, 'message' => 'Opção inválida.']);
+        exit;
+    }
 
-    header("Location: poll.php?id=$poll_id");
-    exit;
+    $pdo->beginTransaction();
+
+    try {
+        $pdo->prepare("UPDATE options SET votes = votes + 1 WHERE id = ?")->execute([$option_id]);
+
+        $pdo->prepare("INSERT INTO votes_log (poll_id, option_id, option_text, ip_address) VALUES (?, ?, ?, ?)")
+            ->execute([$poll_id, $option_id, $option['option_text'], $ip]);
+
+        $pdo->commit();
+
+        // Obter nova contagem
+        $stmt = $pdo->prepare("SELECT votes FROM options WHERE id = ?");
+        $stmt->execute([$option_id]);
+        $updatedVotes = $stmt->fetchColumn();
+
+        echo json_encode(['success' => true, 'updated_votes' => $updatedVotes]);
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        echo json_encode(['success' => false, 'message' => 'Erro ao votar.']);
+    }
 } else {
-    die("Requisição inválida.");
+    echo json_encode(['success' => false, 'message' => 'Requisição inválida.']);
 }
