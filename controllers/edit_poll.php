@@ -7,7 +7,7 @@ if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
 
 $poll_id = (int)$_GET['id'];
 
-// Obtém dados da enquete
+// Busca a enquete
 $stmt = $pdo->prepare("SELECT * FROM polls WHERE id = ?");
 $stmt->execute([$poll_id]);
 $poll = $stmt->fetch();
@@ -16,7 +16,7 @@ if (!$poll) {
     die("Enquete não encontrada.");
 }
 
-// Obtém opções existentes
+// Busca as opções
 $stmt = $pdo->prepare("SELECT * FROM options WHERE poll_id = ?");
 $stmt->execute([$poll_id]);
 $options = $stmt->fetchAll();
@@ -27,19 +27,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $end = $_POST['end_datetime'];
     $updated_options = $_POST['options'];
 
-    // Validação
-    if (count($updated_options) < 3) {
+    if (count(array_filter($updated_options)) < 3) {
         die("É necessário no mínimo 3 opções.");
     }
 
-    // Atualiza enquete
+    // Atualiza a enquete
     $stmt = $pdo->prepare("UPDATE polls SET title = ?, start_datetime = ?, end_datetime = ? WHERE id = ?");
     $stmt->execute([$title, $start, $end, $poll_id]);
 
-    // Atualiza cada opção existente
+    // Atualiza as opções existentes
     foreach ($options as $index => $opt) {
-        $stmt = $pdo->prepare("UPDATE options SET option_text = ? WHERE id = ?");
-        $stmt->execute([$updated_options[$index], $opt['id']]);
+        if (isset($updated_options[$index])) {
+            $stmt = $pdo->prepare("UPDATE options SET option_text = ? WHERE id = ?");
+            $stmt->execute([$updated_options[$index], $opt['id']]);
+        }
     }
 
     header("Location: ../views/index.php");
@@ -53,60 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Enquete</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-            background: #f4f4f4;
-        }
-
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #007BFF;
-        }
-
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-
-        input[type="text"],
-        input[type="datetime-local"] {
-            width: 100%;
-            padding: 8px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        .btn {
-            padding: 10px 18px;
-            background: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
-
-        .btn:hover {
-            background-color: #0056b3;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 15px;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="../assets/css/style.css">
 </head>
 <body>
     <div class="container">
@@ -122,12 +70,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <input type="datetime-local" name="end_datetime" value="<?= date('Y-m-d\TH:i', strtotime($poll['end_datetime'])) ?>" required>
 
             <label>Opções de resposta</label>
-            <?php foreach ($options as $index => $opt): ?>
-                <input type="text" name="options[]" value="<?= htmlspecialchars($opt['option_text']) ?>" required>
-            <?php endforeach; ?>
+            <?php if (!empty($options)): ?>
+                <?php foreach ($options as $index => $opt): ?>
+                    <input type="text" name="options[]" value="<?= htmlspecialchars($opt['option_text']) ?>" required>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="error">Nenhuma opção disponível.</p>
+            <?php endif; ?>
 
             <button type="submit" class="btn">Salvar alterações</button>
         </form>
+
+        <a href="../views/index.php" class="back">← Voltar</a>
     </div>
 </body>
 </html>

@@ -8,72 +8,10 @@ $polls = $stmt->fetchAll();
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Enquetes Disponíveis</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
-
-    .container {
-      max-width: 900px;
-      margin: auto;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    h1 {
-      color: #007BFF;
-    }
-
-    .btn {
-      background-color: #007BFF;
-      color: white;
-      padding: 10px 16px;
-      border: none;
-      border-radius: 6px;
-      text-decoration: none;
-      margin-top: 10px;
-    }
-
-    .poll {
-      background: white;
-      padding: 16px;
-      margin-bottom: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.08);
-    }
-
-    .poll-actions {
-      margin-top: 10px;
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .btn-secondary {
-      background-color: #6c757d;
-    }
-
-    .btn-danger {
-      background-color: #dc3545;
-    }
-
-    @media (max-width: 600px) {
-      .poll-actions {
-        flex-direction: column;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body>
   <div class="container">
