@@ -1,11 +1,18 @@
 <?php
+session_start();
 require_once '../includes/db.php';
 
 function getUserIP() {
     return $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 }
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['option_id'], $_POST['poll_id'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrf_token = $_POST['csrf_token'] ?? '';
+    if (!hash_equals($_SESSION['csrf_token'], $csrf_token)) {
+        echo json_encode(['success' => false, 'message' => 'Erro de segurança: CSRF inválido.']);
+        exit;
+    }
+
     $poll_id = (int)$_POST['poll_id'];
     $option_id = (int)$_POST['option_id'];
     $ip = getUserIP();
@@ -36,7 +43,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['option_id'], $_POST['
 
         $pdo->commit();
 
-        // Obter nova contagem
         $stmt = $pdo->prepare("SELECT votes FROM options WHERE id = ?");
         $stmt->execute([$option_id]);
         $updatedVotes = $stmt->fetchColumn();

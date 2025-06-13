@@ -2,32 +2,32 @@
 require_once __DIR__ . '/../includes/db.php';
 
 $error = '';
+$title = $_POST['title'] ?? '';
+$start_datetime = $_POST['start_datetime'] ?? '';
+$end_datetime = $_POST['end_datetime'] ?? '';
+$options = $_POST['options'] ?? array_fill(0, 5, '');
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = trim($_POST['title']);
-    $start_datetime = $_POST['start_datetime'];
-    $end_datetime = $_POST['end_datetime'];
-    $options = $_POST['options'] ?? [];
+    // Valida campos obrigatórios
+    $option_required_count = 0;
+    foreach (array_slice($options, 0, 3) as $opt) {
+        if (trim($opt) !== '') {
+            $option_required_count++;
+        }
+    }
 
-    // Validação dos campos obrigatórios
     if (empty($title) || empty($start_datetime) || empty($end_datetime)) {
         $error = 'Preencha todos os campos obrigatórios.';
-    } elseif (
-        empty(trim($options[0])) ||
-        empty(trim($options[1])) ||
-        empty(trim($options[2]))
-    ) {
-        $error = 'As três primeiras opções são obrigatórias.';
+    } elseif ($option_required_count < 3) {
+        $error = 'As 3 primeiras opções são obrigatórias.';
     } else {
         try {
             $pdo->beginTransaction();
 
-            // Inserir a enquete
             $stmt = $pdo->prepare("INSERT INTO polls (title, start_datetime, end_datetime) VALUES (?, ?, ?)");
             $stmt->execute([$title, $start_datetime, $end_datetime]);
             $poll_id = $pdo->lastInsertId();
 
-            // Inserir as opções válidas
             $stmtOpt = $pdo->prepare("INSERT INTO options (poll_id, option_text) VALUES (?, ?)");
 
             foreach ($options as $opt) {
@@ -39,10 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $pdo->commit();
 
-            // Redirecionar após criar
+            // Redireciona para a página inicial
             header("Location: ../views/index.php");
             exit;
-
         } catch (Exception $e) {
             $pdo->rollBack();
             $error = "Erro ao criar enquete: " . $e->getMessage();
@@ -63,41 +62,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <h2>Criar Nova Enquete</h2>
 
         <?php if (!empty($error)): ?>
-            <div style="color: red; background-color: #ffe6e6; padding: 10px; border-radius: 5px;">
+            <div class="error" style="color:red; margin-bottom:10px;">
                 <?= htmlspecialchars($error) ?>
             </div>
         <?php endif; ?>
 
         <form method="post">
             <label>Título da Enquete:</label><br>
-            <input type="text" name="title" required><br><br>
+            <input type="text" name="title" value="<?= htmlspecialchars($title) ?>" required><br><br>
 
             <label>Data/Hora de Início:</label><br>
-            <input type="datetime-local" name="start_datetime" required><br><br>
+            <input type="datetime-local" name="start_datetime" value="<?= htmlspecialchars($start_datetime) ?>" required><br><br>
 
             <label>Data/Hora de Fim:</label><br>
-            <input type="datetime-local" name="end_datetime" required><br><br>
+            <input type="datetime-local" name="end_datetime" value="<?= htmlspecialchars($end_datetime) ?>" required><br><br>
 
-            <label>Opções:</label><br><br>
+            <label>Opções:</label><br>
+            <small style="color:gray;">(As 3 primeiras são obrigatórias, as 2 últimas são opcionais)</small><br><br>
 
-            <?php
-            for ($i = 0; $i < 5; $i++):
-                $placeholder = ($i < 3) ? "Opção " . ($i + 1) . " (obrigatória)" : "Opção " . ($i + 1) . " (opcional)";
-            ?>
-                <input 
-                    type="text" 
-                    name="options[]" 
-                    placeholder="<?= $placeholder ?>" 
+            <?php for ($i = 0; $i < 5; $i++): ?>
+                <input
+                    type="text"
+                    name="options[]"
+                    placeholder="Opção <?= $i + 1 ?> <?= $i >= 3 ? '(opcional)' : '(obrigatória)' ?>"
+                    value="<?= htmlspecialchars($options[$i] ?? '') ?>"
                     <?= $i < 3 ? 'required' : '' ?>
                 ><br>
             <?php endfor; ?>
 
             <br>
             <button type="submit">Criar Enquete</button>
+            <a href="../views/index.php" class="btn-cancel">Cancelar</a>
         </form>
-
-        <br>
-        <a href="../views/index.php">← Voltar</a>
     </div>
 </body>
 </html>
