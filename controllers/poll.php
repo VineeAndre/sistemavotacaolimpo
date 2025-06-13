@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../models/poll.php';
+require_once __DIR__ . '/../includes/db.php';
 
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
     die("Enquete inválida.");

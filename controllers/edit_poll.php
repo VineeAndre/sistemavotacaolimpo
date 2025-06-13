@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt->execute([$updated_options[$index], $opt['id']]);
     }
 
-    header("Location: index.php");
+    header("Location: ../views/index.php");
     exit;
 }
 ?>

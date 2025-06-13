@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt->execute([$poll_id, $opt]);
         }
 
-        header("Location: index.php");
+        header("Location: ../views/index.php");
         exit;
     }
 }
