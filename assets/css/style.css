@@ -75,7 +75,6 @@ button {
 }
 
 
-
 /* Pagina de edição da enquete - edit_poll.php*/
 
 body {
@@ -149,7 +148,6 @@ a.back:hover {
         padding: 15px;
     }
 }
-
 
 
 /* === Corpo da página - poll.php===*/
@@ -234,7 +232,6 @@ button:disabled {
         font-size: 22px;
     }
 }
-
 
 
 /* Estilos para a view de enquetes (index.php) */

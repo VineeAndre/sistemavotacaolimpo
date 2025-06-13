@@ -2,10 +2,12 @@
 require_once __DIR__ . '/../includes/db.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $title = $_POST['title'];
+    $title = htmlspecialchars(trim($_POST['title']));
     $start = $_POST['start_datetime'];
     $end = $_POST['end_datetime'];
-    $options = array_filter($_POST['options']);
+    $options = array_map(function($opt) {
+    return htmlspecialchars(trim($opt));
+}, $_POST['options']);
 
     if (count($options) < 3) {
         $error = "Você precisa inserir no mínimo 3 opções.";
