@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Criar Enquete</button>
     </form>
 
-    <a class="back" href="index.php">← Voltar</a>
+    <a class="back" href="../views/index.php">← Voltar</a>
 </div>
 </body>
 </html>
