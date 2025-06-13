@@ -97,5 +97,6 @@ CREATE TABLE votes_log (
 ## ✍️ Autor
 
 - **Vinicius André Froggel de Miranda**
-- [LinkedIn](https://www.linkedin.com/in/viniciusandr%C3%A9/) | [GitHub](https://github.com/)
+- [LinkedIn](https://www.linkedin.com/in/viniciusandr%C3%A9/)
+- 
 
