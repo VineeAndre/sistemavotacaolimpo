@@ -74,6 +74,28 @@ CREATE TABLE votes_log (
     FOREIGN KEY (poll_id) REFERENCES polls(id) ON DELETE CASCADE
 );
 ```
+🔧 Instalação e Execução
+
+Clone o projeto:
+
+git clone https://github.com/seu-usuario/seu-repositorio.git
+
+Crie um banco de dados MySQL e execute o script SQL acima.
+
+Configure a conexão no arquivo:
+
+/includes/db.php
+
+Exemplo de configuração:
+
+$pdo = new PDO("mysql:host=localhost;dbname=seu_banco", "seu_usuario", "sua_senha");
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+Coloque o projeto em seu servidor local (ex.: XAMPP, WAMP ou Apache Nativo).
+
+Acesse via navegador:
+
+```
 
 ## 🔒 Segurança
 
