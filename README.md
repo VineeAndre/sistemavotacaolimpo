@@ -18,6 +18,7 @@ Este é um sistema de enquetes desenvolvido em PHP com banco de dados MySQL, que
 - ✅ Validação de período ativo da enquete (não permite votar fora da data/hora)
 - ✅ Interface simples, responsiva e amigável
 - ✅ Logs de votos registrados no banco
+- ✅ Formulário responsivo e estilizado
 
 ---
 
