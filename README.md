@@ -130,5 +130,4 @@ http://localhost/seu-projeto/views/index.php
 
 - **Vinicius André Froggel de Miranda**
 - [LinkedIn](https://www.linkedin.com/in/viniciusandr%C3%A9/)
-- 
 
