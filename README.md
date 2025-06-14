@@ -76,24 +76,33 @@ CREATE TABLE votes_log (
 ```
 🔧 Instalação e Execução
 
-Clone o projeto:
+1. Clone o projeto:
 
+```bash
 git clone https://github.com/seu-usuario/seu-repositorio.git
+```
 
-Crie um banco de dados MySQL e execute o script SQL acima.
+2. Crie um banco de dados MySQL e execute o script SQL acima.
 
-Configure a conexão no arquivo:
+3. Configure a conexão no arquivo:
 
+```php
 /includes/db.php
+```
 
 Exemplo de configuração:
 
+```php
 $pdo = new PDO("mysql:host=localhost;dbname=seu_banco", "seu_usuario", "sua_senha");
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+```
 
-Coloque o projeto em seu servidor local (ex.: XAMPP, WAMP ou Apache Nativo).
+4. Coloque o projeto em seu servidor local (ex.: XAMPP, WAMP ou Apache Nativo).
 
-Acesse via navegador:
+5. Acesse via navegador:
+
+```
+http://localhost/seu-projeto/views/index.php
 
 ```
 
