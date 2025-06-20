@@ -118,7 +118,7 @@ http://localhost/seu-projeto/views/index.php
 
 ## 🛠️ Tecnologias Utilizadas
 
-- 🐘 PHP (puro)
+- 🐘 PHP 
 - 📔 MySQL
 - 🎨 HTML, CSS(flexBox)
 - ⚙️ JavaScript (AJAX)
